@@ -1,0 +1,19 @@
+version: "3.7"
+
+services:
+  item-app:
+    image: rizkisetyawan/item-app:v1
+    ports:
+      - 80:8080 # Meneruskan port 80 dari host ke port 8080 di kontainer
+    depends_on:
+      - item-db # Menentukan ketergantungan item-app terhadap item-db
+    restart: always # Restart policy: container akan selalu direstart jika mengalami kegagalan atau berhenti
+
+  item-db:
+    image: mongo:3
+    volumes:
+      - app-db:/data/db # Mengaitkan volume app-db dengan direktori /data/db di kontainer
+    restart: unless-stopped # Restart policy: container akan direstart jika berhenti secara tidak sengaja atau karena adanya pemutusan daya
+
+volumes:
+  app-db:
