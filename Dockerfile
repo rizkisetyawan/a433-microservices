@@ -20,5 +20,5 @@ RUN npm install --production --unsafe-perm && npm run build
 # Mengekspos port 8080 di dalam container agar dapat diakses dari luar
 EXPOSE 8080
 
-# Menjalankan perintah node ./bin/www saat container dijalankan
+# Menjalankan perintah npm start saat container dijalankan
 CMD ["npm", "start"]
