@@ -14,11 +14,11 @@ COPY . .
 ENV NODE_ENV=production
 ENV DB_HOST=item-db
 
-# Menginstal dependensi aplikasi menggunakan Yarn package manager dengan opsi --production
-RUN yarn install --production
+# Menginstal dependencies untuk production dan kemudian build aplikasi
+RUN npm install --production --unsafe-perm && npm run build
+
+# Mengekspos port 8080 di dalam container agar dapat diakses dari luar
+EXPOSE 8080
 
 # Menjalankan perintah node ./bin/www saat container dijalankan
-CMD ["node", "./bin/www"]
-
-# Mengekspos port 3000 di dalam container agar dapat diakses dari luar
-EXPOSE 3000
+CMD ["npm", "start"]
