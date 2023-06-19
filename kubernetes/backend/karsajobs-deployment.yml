@@ -27,7 +27,7 @@ spec:
               secretKeyRef:
                 name: mongo-secret
                 key: MONGO_ROOT_USERNAME
-          - name: MONGO_PAST
+          - name: MONGO_PASS
             valueFrom:
               secretKeyRef:
                 name: mongo-secret
