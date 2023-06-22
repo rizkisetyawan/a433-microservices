@@ -1,0 +1,46 @@
+version: "3.2"  # Versi dari format docker-compose.yml yang digunakan.
+
+services:  # Definisi layanan yang akan dibuat.
+  rabbitmq:  # Nama layanan pertama, RabbitMQ.
+    image: rabbitmq:3.8-management-alpine  # Gambar Docker yang digunakan untuk layanan RabbitMQ.
+    container_name: 'rabbitmq_container'  # Nama kontainer untuk layanan RabbitMQ.
+    ports:  # Port mapping untuk kontainer RabbitMQ.
+      - 5673:5672  # Mengaitkan port 5673 pada host dengan port 5672 di kontainer RabbitMQ.
+      - 15673:15672  # Mengaitkan port 15673 pada host dengan port 15672 di kontainer RabbitMQ.
+    volumes:  # Mounting volume untuk kontainer RabbitMQ.
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/  # Mengaitkan direktori host dengan direktori kontainer untuk menyimpan data RabbitMQ.
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq  # Mengaitkan direktori host dengan direktori kontainer untuk menyimpan log RabbitMQ.
+    networks:  # Jaringan yang digunakan oleh kontainer RabbitMQ.
+      - rabbitmq_network
+
+  order-service:  # Nama layanan kedua, order-service.
+    image: rizkisetyawan/order-service:v1  # Gambar Docker yang digunakan untuk layanan order-service.
+    container_name: 'order_service_container'  # Nama kontainer untuk layanan order-service.
+    ports:  # Port mapping untuk kontainer order-service.
+      - 3000:3000  # Mengaitkan port 3000 pada host dengan port 3000 di kontainer order-service.
+    depends_on:  # Ketergantungan layanan order-service terhadap layanan rabbitmq.
+      - "rabbitmq"  # Order-service tergantung pada layanan RabbitMQ.
+    command: sh -c '/bin/wait-for-it.sh rabbitmq:5672 --timeout=30 -- npm start'  # Perintah yang akan dijalankan saat kontainer order-service dimulai.
+    environment:  # Variabel lingkungan untuk kontainer order-service.
+      AMQP_URL: amqp://guest:guest@rabbitmq:5672  # URL AMQP untuk terhubung ke RabbitMQ.
+    networks:  # Jaringan yang digunakan oleh kontainer order-service.
+      - rabbitmq_network
+    restart: always  # Restart kontainer order-service secara otomatis jika berhenti.
+
+  shipping-service:  # Nama layanan ketiga, shipping-service.
+    image: rizkisetyawan/shipping-service:v1  # Gambar Docker yang digunakan untuk layanan shipping-service.
+    container_name: 'shipping_service_container'  # Nama kontainer untuk layanan shipping-service.
+    ports:  # Port mapping untuk kontainer shipping-service.
+      - 3001:3001  # Mengaitkan port 3001 pada host dengan port 3001 di kontainer shipping-service.
+    depends_on:  # Ketergantungan layanan shipping-service terhadap layanan rabbitmq.
+      - "rabbitmq"  # Shipping-service tergantung pada layanan RabbitMQ.
+    command: sh -c '/bin/wait-for-it.sh rabbitmq:5672 --timeout=30 -- npm start'  # Perintah yang akan dijalankan saat kontainer shipping-service dimulai.
+    environment:  # Variabel lingkungan untuk kontainer shipping-service.
+      AMQP_URL: amqp://guest:guest@rabbitmq:5672  # URL AMQP untuk terhubung ke RabbitMQ.
+    networks:  # Jaringan yang digunakan oleh kontainer shipping-service.
+      - rabbitmq_network
+    restart: always  # Restart kontainer shipping-service secara otomatis jika berhenti.
+
+networks:  # Definisi jaringan yang akan digunakan.
+  rabbitmq_network:  # Nama jaringan, rabbitmq_network.
+    driver: bridge  # Driver jaringan yang digunakan, dalam hal ini bridge.
